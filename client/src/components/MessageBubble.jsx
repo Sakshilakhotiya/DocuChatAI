@@ -3,40 +3,36 @@ function MessageBubble({ role, content, source }) {
 
   return (
     <div
-      className={`flex w-full gap-3 ${
+      className={`flex w-full gap-2 ${
         isUser ? "justify-end" : "justify-start"
       }`}
     >
       {!isUser && (
-        <div className="mt-1 flex h-8 w-8 items-center justify-center rounded-full bg-emerald-500/12 text-sm text-emerald-300 shadow-[0_0_18px_rgba(16,185,129,0.75)]">
+        <div className="mt-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-indigo-500/20 text-[10px] font-medium text-indigo-300 shadow-[0_0_14px_rgba(99,102,241,0.35)]">
           AI
         </div>
       )}
       <div
-        className={`max-w-[75%] rounded-2xl border px-3 py-2 text-sm shadow-[0_14px_40px_rgba(15,23,42,0.9)] backdrop-blur-xl ${
+        className={`max-w-[85%] rounded-2xl px-3 py-2 text-sm ${
           isUser
-            ? "rounded-br-md border-emerald-400/40 bg-emerald-500/90 text-slate-950"
-            : "rounded-bl-md border-slate-700/70 bg-slate-900/80 text-slate-100"
+            ? "rounded-br-md bg-slate-100/95 text-slate-900 shadow-[0_2px_12px_rgba(0,0,0,0.08)]"
+            : "rounded-bl-md border border-indigo-500/15 bg-slate-800/70 text-slate-100 shadow-[0_0_20px_rgba(99,102,241,0.12)] backdrop-blur-sm"
         }`}
       >
         <p className="whitespace-pre-wrap leading-relaxed">{content}</p>
         {source && (
-          <div className="mt-2 rounded-xl border border-slate-700/70 bg-slate-950/85 px-2 py-1 text-[11px] text-slate-300">
-            <div className="mb-0.5 flex items-center gap-2 text-emerald-300">
-              <span className="inline-flex h-3.5 w-3.5 items-center justify-center rounded-full bg-emerald-500/10 text-[9px]">
-                🔍
-              </span>
-              <span className="font-semibold">
-                Source snippet
-                {typeof source.page === "number" ? ` · page ${source.page}` : ""}
-              </span>
+          <div className="mt-2 rounded-xl border border-white/10 bg-slate-900/60 px-2.5 py-1.5 text-[11px] text-slate-300">
+            <div className="mb-1 flex items-center gap-1.5 font-semibold text-indigo-300">
+              <span className="text-[9px]">🔍</span>
+              Source
+              {typeof source.page === "number" ? ` · p.${source.page}` : ""}
             </div>
-            <p className="line-clamp-4 text-slate-300/90">{source.text}</p>
+            <p className="line-clamp-3 text-slate-400">{source.text}</p>
           </div>
         )}
       </div>
       {isUser && (
-        <div className="mt-1 flex h-8 w-8 items-center justify-center rounded-full bg-slate-800 text-sm text-slate-100 shadow-[0_0_16px_rgba(15,23,42,0.9)]">
+        <div className="mt-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-slate-600/80 text-[10px] font-medium text-white shadow-[0_2px_10px_rgba(0,0,0,0.2)]">
           You
         </div>
       )}
@@ -45,4 +41,3 @@ function MessageBubble({ role, content, source }) {
 }
 
 export default MessageBubble;
-

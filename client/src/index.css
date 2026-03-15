@@ -3,7 +3,7 @@
 @tailwind utilities;
 
 body {
-  @apply bg-background text-slate-100 antialiased;
+  @apply text-slate-100 antialiased;
 }
 
 .scrollbar-thin {
@@ -11,10 +11,19 @@ body {
 }
 
 .scrollbar-thin::-webkit-scrollbar {
-  width: 6px;
+  width: 5px;
+  height: 5px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-track {
+  background: transparent;
 }
 
 .scrollbar-thin::-webkit-scrollbar-thumb {
-  background-color: rgb(51 65 85);
+  background: rgba(99, 102, 241, 0.35);
   border-radius: 999px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb:hover {
+  background: rgba(99, 102, 241, 0.5);
 }

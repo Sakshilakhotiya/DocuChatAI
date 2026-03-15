@@ -1,5 +1,6 @@
 import { useState } from "react";
 import axios from "axios";
+import { motion } from "framer-motion";
 import MessageBubble from "./MessageBubble.jsx";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000/api";
@@ -11,48 +12,32 @@ function ChatBox({ messages, onNewMessage, documentId, isLoading, setIsLoading }
   const handleSubmit = async (event) => {
     event.preventDefault();
     const trimmed = input.trim();
-    if (!trimmed) {
-      return;
-    }
+    if (!trimmed) return;
     if (!documentId) {
       setError("Please upload a PDF before asking questions.");
       return;
     }
     setError("");
-
-    const userMessage = {
-      id: `${Date.now()}-user`,
-      role: "user",
-      content: trimmed
-    };
-
+    const userMessage = { id: `${Date.now()}-user`, role: "user", content: trimmed };
     setIsLoading(true);
     setInput("");
 
     try {
-      // Send the question and current document id to the backend.
       const response = await axios.post(`${API_BASE_URL}/ask-question`, {
         question: trimmed,
         documentId
       });
-
       const data = response.data;
-
       const aiMessage = {
         id: `${Date.now()}-ai`,
         role: "assistant",
         content: data.answer,
         source: data.source || null
       };
-
-      if (onNewMessage) {
-        onNewMessage(userMessage, aiMessage);
-      }
+      if (onNewMessage) onNewMessage(userMessage, aiMessage);
     } catch (err) {
       const message =
-        err.response?.data?.message ||
-        err.message ||
-        "Something went wrong while generating the answer.";
+        err.response?.data?.message || err.message || "Something went wrong while generating the answer.";
       setError(message);
       const aiMessage = {
         id: `${Date.now()}-ai-error`,
@@ -60,96 +45,90 @@ function ChatBox({ messages, onNewMessage, documentId, isLoading, setIsLoading }
         content: "I was unable to answer that question due to an error.",
         source: null
       };
-      if (onNewMessage) {
-        onNewMessage(userMessage, aiMessage);
-      }
+      if (onNewMessage) onNewMessage(userMessage, aiMessage);
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <section className="flex h-[calc(100vh-220px)] flex-col gap-3 rounded-3xl border border-[#1e293b]/80 bg-[#020617]/80 p-3 shadow-[0_22px_80px_rgba(15,23,42,0.95)] backdrop-blur-2xl md:h-[calc(100vh-240px)] md:p-4">
-      <div className="mb-1 flex items-center justify-between px-1 text-xs text-slate-400">
-        <span>
-          Chat grounded in{" "}
-          <span className="font-semibold text-emerald-300">your PDF</span>.
-        </span>
-        <span className="hidden md:inline text-[11px] text-slate-500">
-          Your questions and answers are not persisted on the server.
-        </span>
-      </div>
-
-      <div className="flex-1 space-y-3 overflow-y-auto rounded-2xl bg-gradient-to-b from-slate-950/80 via-slate-950/60 to-slate-950/90 p-3 scrollbar-thin scrollbar-thumb-slate-700/70 scrollbar-track-transparent">
+    <section className="flex min-h-0 flex-1 flex-col rounded-2xl border border-white/5 bg-slate-950/30 backdrop-blur-sm">
+      <div className="flex-1 space-y-3 overflow-y-auto p-3 scrollbar-thin">
         {messages.length === 0 && (
-          <div className="flex h-full items-center justify-center text-sm text-slate-500">
-            <div className="max-w-md text-center">
-              <p className="font-medium text-slate-200">
-                Upload a PDF to get started.
+          <div className="flex h-full min-h-[140px] items-center justify-center text-center">
+            <div className="max-w-[280px]">
+              <p className="text-sm font-medium text-slate-300">
+                Upload a PDF, then ask questions about it.
               </p>
               <p className="mt-1 text-xs text-slate-500">
-                Ask questions like &quot;Summarize section 2&quot; or
-                &quot;What are the key points about X?&quot;. Answers are generated strictly
-                from the uploaded document.
+                Answers are generated strictly from your document.
               </p>
             </div>
           </div>
         )}
-        {messages.map((message) => (
-          <MessageBubble
+        {messages.map((message, i) => (
+          <motion.div
             key={message.id}
-            role={message.role}
-            content={message.content}
-            source={message.source}
-          />
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.2, delay: i * 0.02 }}
+          >
+            <MessageBubble
+              role={message.role}
+              content={message.content}
+              source={message.source}
+            />
+          </motion.div>
         ))}
         {isLoading && (
-          <div className="flex w-full justify-start gap-3">
-            <div className="mt-1 flex h-8 w-8 items-center justify-center rounded-full bg-emerald-500/12 text-sm text-emerald-300 shadow-[0_0_20px_rgba(16,185,129,0.75)]">
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="flex w-full justify-start gap-2"
+          >
+            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-indigo-500/20 text-xs text-indigo-300 shadow-[0_0_16px_rgba(99,102,241,0.4)]">
               AI
             </div>
-            <div className="flex items-center gap-2 rounded-2xl border border-slate-700/70 bg-slate-900/95 px-3 py-2 text-xs text-slate-200 shadow-[0_16px_40px_rgba(15,23,42,0.9)]">
-              <span className="flex h-2 w-10 items-center justify-between">
-                <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-emerald-400 [animation-delay:-0.15s]" />
-                <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-emerald-400 [animation-delay:-0.05s]" />
-                <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-emerald-400" />
+            <div className="flex items-center gap-2 rounded-2xl rounded-bl-sm border border-indigo-500/20 bg-slate-800/60 px-3 py-2 text-xs text-slate-200 shadow-[0_0_20px_rgba(99,102,241,0.15)]">
+              <span className="flex gap-1">
+                <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-indigo-400 [animation-delay:-0.2s]" />
+                <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-violet-400 [animation-delay:-0.1s]" />
+                <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-indigo-400" />
               </span>
-              <span>Thinking with your PDF…</span>
+              <span>Thinking…</span>
             </div>
-          </div>
+          </motion.div>
         )}
       </div>
 
-      <form onSubmit={handleSubmit} className="mt-2 flex flex-col gap-2">
-        <div className="flex items-end gap-2">
+      <form onSubmit={handleSubmit} className="shrink-0 p-3 pt-0">
+        <div className="flex items-end gap-2 rounded-2xl border border-white/10 bg-slate-900/60 px-2 py-2 shadow-inner backdrop-blur-md focus-within:border-indigo-400/40 focus-within:shadow-[0_0_24px_rgba(99,102,241,0.15)]">
           <textarea
-            rows={2}
+            rows={1}
             value={input}
             onChange={(e) => setInput(e.target.value)}
             placeholder={
               documentId
-                ? "Ask a question about the uploaded PDF…"
-                : "Upload a PDF first, then ask a question…"
+                ? "Ask about your PDF…"
+                : "Upload a PDF first…"
             }
-            className="min-h-[52px] flex-1 resize-none rounded-2xl border border-[#1e293b] bg-slate-950/85 px-3 py-2 text-sm text-slate-100 shadow-inner shadow-black/60 outline-none ring-0 focus:border-emerald-400 focus:ring-1 focus:ring-emerald-500/60 disabled:cursor-not-allowed disabled:opacity-60"
+            className="min-h-[40px] flex-1 resize-none rounded-xl border-0 bg-transparent px-3 py-2 text-sm text-slate-100 placeholder-slate-500 outline-none"
             disabled={isLoading}
           />
           <button
             type="submit"
             disabled={!input.trim() || isLoading}
-            className="inline-flex h-[52px] items-center justify-center rounded-2xl bg-gradient-to-r from-emerald-500 via-emerald-400 to-cyan-400 px-5 text-sm font-semibold text-slate-950 shadow-[0_18px_55px_rgba(34,211,238,0.7)] transition hover:from-emerald-400 hover:via-emerald-300 hover:to-cyan-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950 disabled:cursor-not-allowed disabled:from-emerald-500/40 disabled:via-emerald-400/40 disabled:to-cyan-400/40 disabled:shadow-none"
+            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-violet-500 text-white shadow-[0_0_20px_rgba(99,102,241,0.5)] transition hover:from-indigo-400 hover:to-violet-400 disabled:opacity-40 disabled:shadow-none"
           >
-            Send
+            <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+            </svg>
           </button>
         </div>
-        <div className="flex items-center justify-between text-[11px] text-slate-500">
-          <span>DocuChat AI only answers based on the current PDF.</span>
-          {error && <span className="text-red-400">{error}</span>}
-        </div>
+        {error && <p className="mt-1.5 text-[11px] text-red-400">{error}</p>}
       </form>
     </section>
   );
 }
 
 export default ChatBox;
-
